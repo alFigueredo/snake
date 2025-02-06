@@ -12,8 +12,8 @@ sf::RectangleShape new_shape(sf::Vector2f pos, const float size) {
 
 int main() {
   const unsigned int widthP = 512;
-  const unsigned int heightP = 256;
-  const float size = 32;
+  const unsigned int heightP = 384;
+  const float size = 16;
 
   const unsigned int width = widthP / size;
   const unsigned int height = heightP / size;
@@ -43,14 +43,16 @@ int main() {
 
   sf::Keyboard::Scan::Scancode lastMoving = sf::Keyboard::Scan::D;
   sf::Keyboard::Scan::Scancode moving = sf::Keyboard::Scan::D;
+  unsigned int baseTime = 1024;
+  const unsigned int baseLimit = 64;
   bool lose = false;
 
   while (window.isOpen()) {
     sf::Event event;
-    const int pause =
-        sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::X) ? 100 : 1000;
+    const int pause = sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::X)
+                          ? baseLimit
+                          : baseTime;
     while (window.pollEvent(event)) {
-      std::cout << "TRACE: event: " << event.type << '\n';
       if (event.type == sf::Event::Closed)
         window.close();
       else if (event.type == sf::Event::KeyPressed) {
@@ -81,7 +83,6 @@ int main() {
       continue;
     }
 
-    std::cout << "TRACE: moving: " << moving << '\n';
     const sf::Vector2f pos = snake.front().getPosition() / size;
     sf::Vector2f move = sf::Vector2f(-1, -1);
     switch (moving) {
@@ -106,7 +107,6 @@ int main() {
     default:
       break;
     }
-    std::cout << "TRACE: move: " << move.x << ", " << move.y << '\n';
     if (std::any_of(snake.begin(), snake.end() - 1,
                     [&move, &size](sf::RectangleShape &shape) {
                       return move == shape.getPosition() / size;
@@ -121,6 +121,8 @@ int main() {
       lastMoving = moving;
       if (move == food.getPosition() / size) {
         food.setPosition(size * randWidth(gen), size * randHeight(gen));
+        if (baseTime > baseLimit * 2)
+          baseTime -= 16;
         while (std::any_of(snake.begin(), snake.end(),
                            [&food](sf::RectangleShape &shape) {
                              return food.getPosition() == shape.getPosition();
@@ -135,6 +137,7 @@ int main() {
       window.draw(shape);
     window.draw(food);
     window.display();
+    std::cout << "[TRACE]pause: " << pause << '\n';
 
     sf::sleep(sf::milliseconds(pause));
   }
