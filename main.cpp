@@ -32,7 +32,7 @@ int main() {
   snake[1].setFillColor(sf::Color::Green);
 
   sf::RectangleShape food(sf::Vector2f(size, size));
-  food.setFillColor(sf::Color::White);
+  food.setFillColor(sf::Color::Blue);
   food.setPosition(sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
   while (std::any_of(snake.begin(), snake.end(),
                      [&food](sf::RectangleShape &shape) {
@@ -40,6 +40,19 @@ int main() {
                      }))
     food.setPosition(
         sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
+
+  sf::Font font;
+  if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")) {
+    std::cout << "Error: cannot load font!" << '\n';
+    return 1;
+  }
+  sf::Text text;
+  text.setFont(font);
+  text.setFillColor(sf::Color::White);
+  text.setCharacterSize(24);
+  text.setPosition(sf::Vector2f(widthP - 160, 0));
+  unsigned int score = 0;
+  text.setString("Score: " + std::to_string(score));
 
   sf::Keyboard::Scan::Scancode lastMoving = sf::Keyboard::Scan::D;
   sf::Keyboard::Scan::Scancode moving = sf::Keyboard::Scan::D;
@@ -114,6 +127,7 @@ int main() {
       for (auto &shape : snake)
         shape.setFillColor(sf::Color::Red);
       lose = true;
+      text.setString("Game over!");
     }
     if (!lose && move != sf::Vector2f(-1, -1)) {
       snake.push_front(new_shape(move, size));
@@ -121,6 +135,8 @@ int main() {
       lastMoving = moving;
       if (move == food.getPosition() / size) {
         food.setPosition(size * randWidth(gen), size * randHeight(gen));
+        score += 10;
+        text.setString("Score: " + std::to_string(score));
         if (baseTime > baseLimit * 2)
           baseTime -= 16;
         while (std::any_of(snake.begin(), snake.end(),
@@ -129,6 +145,7 @@ int main() {
                            }))
           food.setPosition(
               sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
+
       } else
         snake.pop_back();
     }
@@ -136,8 +153,8 @@ int main() {
     for (const auto &shape : snake)
       window.draw(shape);
     window.draw(food);
+    window.draw(text);
     window.display();
-    std::cout << "[TRACE]pause: " << pause << '\n';
 
     sf::sleep(sf::milliseconds(pause));
   }
