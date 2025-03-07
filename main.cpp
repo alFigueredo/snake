@@ -57,7 +57,7 @@ int main() {
   sf::Keyboard::Scan::Scancode lastMoving = sf::Keyboard::Scan::D;
   sf::Keyboard::Scan::Scancode moving = sf::Keyboard::Scan::D;
   unsigned int baseTime = 1024;
-  const unsigned int baseLimit = 64;
+  const unsigned int baseLimit = 48;
   bool lose = false;
 
   while (window.isOpen()) {
