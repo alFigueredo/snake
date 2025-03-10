@@ -16,7 +16,7 @@ debug: makeshared_debug build
 rebuild: clean build
 
 run: build
-	./build/main.out
+	$(MODULE_NAME)
 
 $(MODULE_NAME): $(OBJECT_FILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
