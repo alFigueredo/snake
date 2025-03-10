@@ -5,7 +5,6 @@ MODULE_NAME := ./build/main.out
 SOURCE_FILES := $(shell find . -type f -iname "*.cpp" -exec basename {} \;)
 OBJECT_FILES := $(SOURCE_FILES:%.cpp=./build/%.o)
 LINKS := -lsfml-graphics -lsfml-window -lsfml-system
-TEST_FILE := ./test.txt
 
 ### Reglas ###
 
@@ -16,8 +15,8 @@ debug: makeshared_debug build
 
 rebuild: clean build
 
-test: build
-	$(MODULE_NAME) $(MAIN_FILE)
+run: build
+	./build/main.out
 
 $(MODULE_NAME): $(OBJECT_FILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKS)
