@@ -11,7 +11,7 @@ LINKS := -lsfml-graphics -lsfml-window -lsfml-system
 build: makefolder $(MODULE_NAME)
 
 debug: CFLAGS := $(CFLAGS) -g
-debug: makeshared_debug build
+debug: build
 
 rebuild: clean build
 
