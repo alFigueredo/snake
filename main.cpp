@@ -23,7 +23,7 @@ int main() {
   std::uniform_int_distribution<> randWidth(0, width - 1);
   std::uniform_int_distribution<> randHeight(0, height - 1);
 
-  sf::RenderWindow window(sf::VideoMode({widthP, heightP}), "SFML works!");
+  sf::RenderWindow window(sf::VideoMode({widthP, heightP}), "Snake");
 
   std::deque<sf::RectangleShape> snake;
   for (unsigned i = 0; i < 3; ++i)
