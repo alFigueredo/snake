@@ -9,6 +9,7 @@ sf::Keyboard::Scan::Scancode moving;
 unsigned int baseTime;
 const unsigned int baseLimit = 48;
 bool lose;
+bool paused;
 
 sf::RectangleShape new_shape(sf::Vector2f pos, const float size) {
   sf::RectangleShape shape(sf::Vector2f(size, size));
@@ -26,6 +27,7 @@ void reset(std::deque<sf::RectangleShape> &snake, sf::RectangleShape &food,
   moving = sf::Keyboard::Scan::D;
   baseTime = 1024;
   lose = false;
+  paused = false;
 
   snake.clear();
   for (unsigned i = 0; i < 3; ++i)
@@ -84,6 +86,10 @@ int main() {
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed)
         window.close();
+      else if (event.type == sf::Event::LostFocus)
+        paused = true;
+      else if (event.type == sf::Event::GainedFocus)
+        paused = false;
       else if (event.type == sf::Event::KeyPressed) {
         switch (event.key.scancode) {
         case sf::Keyboard::Scan::W:
@@ -104,6 +110,10 @@ int main() {
           break;
         case sf::Keyboard::Scan::R:
           reset(snake, food, gen, randWidth, randHeight, size, text);
+          continue;
+        case sf::Keyboard::Scan::P:
+          paused = !paused;
+          break;
         default:
           break;
         }
@@ -146,8 +156,9 @@ int main() {
         shape.setFillColor(sf::Color::Red);
       lose = true;
       text.setString("Game over!");
-    }
-    if (!lose && move != sf::Vector2f(-1, -1)) {
+    } else if (paused)
+      text.setString("Paused");
+    else if (move != sf::Vector2f(-1, -1)) {
       snake.push_front(new_shape(move, size));
       snake[1].setFillColor(sf::Color::Green);
       lastMoving = moving;
@@ -166,6 +177,7 @@ int main() {
 
       } else
         snake.pop_back();
+      text.setString("Score: " + std::to_string(score));
     }
     window.clear();
     for (const auto &shape : snake)
