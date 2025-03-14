@@ -3,11 +3,46 @@
 #include <iostream>
 #include <random>
 
+unsigned int score;
+sf::Keyboard::Scan::Scancode lastMoving;
+sf::Keyboard::Scan::Scancode moving;
+unsigned int baseTime;
+const unsigned int baseLimit = 48;
+bool lose;
+
 sf::RectangleShape new_shape(sf::Vector2f pos, const float size) {
   sf::RectangleShape shape(sf::Vector2f(size, size));
   shape.setFillColor(sf::Color::Yellow);
   shape.setPosition(pos * size);
   return shape;
+}
+
+void reset(std::deque<sf::RectangleShape> &snake, sf::RectangleShape &food,
+           std::mt19937 &gen, std::uniform_int_distribution<> &randWidth,
+           std::uniform_int_distribution<> &randHeight, const float &size,
+           sf::Text &text) {
+  score = 0;
+  lastMoving = sf::Keyboard::Scan::D;
+  moving = sf::Keyboard::Scan::D;
+  baseTime = 1024;
+  lose = false;
+
+  snake.clear();
+  for (unsigned i = 0; i < 3; ++i)
+    snake.push_front(new_shape(sf::Vector2f(i, 0), size));
+  snake[0].setFillColor(sf::Color::Green);
+  snake[1].setFillColor(sf::Color::Green);
+
+  food.setFillColor(sf::Color::Blue);
+  food.setPosition(sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
+  while (std::any_of(snake.begin(), snake.end(),
+                     [&food](sf::RectangleShape &shape) {
+                       return food.getPosition() == shape.getPosition();
+                     }))
+    food.setPosition(
+        sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
+
+  text.setString("Score: " + std::to_string(score));
 }
 
 int main() {
@@ -26,20 +61,7 @@ int main() {
   sf::RenderWindow window(sf::VideoMode({widthP, heightP}), "Snake");
 
   std::deque<sf::RectangleShape> snake;
-  for (unsigned i = 0; i < 3; ++i)
-    snake.push_front(new_shape(sf::Vector2f(i, 0), size));
-  snake[0].setFillColor(sf::Color::Green);
-  snake[1].setFillColor(sf::Color::Green);
-
   sf::RectangleShape food(sf::Vector2f(size, size));
-  food.setFillColor(sf::Color::Blue);
-  food.setPosition(sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
-  while (std::any_of(snake.begin(), snake.end(),
-                     [&food](sf::RectangleShape &shape) {
-                       return food.getPosition() == shape.getPosition();
-                     }))
-    food.setPosition(
-        sf::Vector2f(size * randWidth(gen), size * randHeight(gen)));
 
   sf::Font font;
   if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")) {
@@ -51,14 +73,8 @@ int main() {
   text.setFillColor(sf::Color::White);
   text.setCharacterSize(24);
   text.setPosition(sf::Vector2f(widthP - 160, 0));
-  unsigned int score = 0;
-  text.setString("Score: " + std::to_string(score));
 
-  sf::Keyboard::Scan::Scancode lastMoving = sf::Keyboard::Scan::D;
-  sf::Keyboard::Scan::Scancode moving = sf::Keyboard::Scan::D;
-  unsigned int baseTime = 1024;
-  const unsigned int baseLimit = 48;
-  bool lose = false;
+  reset(snake, food, gen, randWidth, randHeight, size, text);
 
   while (window.isOpen()) {
     sf::Event event;
@@ -86,6 +102,8 @@ int main() {
           if (lastMoving != sf::Keyboard::Scan::A)
             moving = event.key.scancode;
           break;
+        case sf::Keyboard::Scan::R:
+          reset(snake, food, gen, randWidth, randHeight, size, text);
         default:
           break;
         }
